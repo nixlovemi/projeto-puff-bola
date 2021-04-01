@@ -1,0 +1,6 @@
+# Docker
+========
+  * Iniciar containers: docker-compose up -d
+  * Mostrar containers: docker ps
+  * Remover containers: docker rm -f $(docker ps -a -q)
+  * Abrir bash: docker exec -it [NOME CONTAINER] bash
