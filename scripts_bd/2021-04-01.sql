@@ -21,6 +21,8 @@ ENGINE=InnoDB
 DEFAULT CHARSET=utf8
 COLLATE=utf8_general_ci;
 
+ALTER TABLE db.genres ADD CONSTRAINT genres_UN UNIQUE KEY (name);
+
 CREATE TABLE db.movies_genres (
 	id BIGINT UNSIGNED auto_increment NOT NULL,
 	movie_id BIGINT UNSIGNED NOT NULL,
@@ -44,3 +46,6 @@ CREATE TABLE db.movies_rating (
 ENGINE=InnoDB
 DEFAULT CHARSET=utf8
 COLLATE=utf8_general_ci;
+
+ALTER TABLE db.movies ADD active BOOL DEFAULT True NOT NULL;
+ALTER TABLE db.genres ADD active BOOL DEFAULT True NULL;

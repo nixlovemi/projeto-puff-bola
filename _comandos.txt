@@ -4,6 +4,7 @@ https://web.isan.org/public/en/search?domain=search
 
 # Docker
 ========
+  * Sempre qual alterar algo no Dockerfile, deleta td (inclusive as imagens) e rebuilda
   * Iniciar containers: docker-compose up -d
   * Mostrar containers: docker ps
   * Remover containers: docker rm -f $(docker ps -a -q)

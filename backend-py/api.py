@@ -1,9 +1,7 @@
-# Observatory Service
-
 # Import framework
 from flask import Flask
-from flask_restful import Resource, Api
-from flask import request
+from flask_restful import Api
+from controllers.movies.movies import MoviesController
 
 # Instantiate the app
 app = Flask(__name__)
@@ -17,26 +15,9 @@ api = Api(app)
 #    def meow(self): return {}
 #api.add_resource(CuteKitty,'/api/kitty/meow',endpoint='meow',methods=['GET'])
 
-class Teste(Resource):
-    def get(self):
-        return {
-            'Galaxies': [
-                'Milkyway',
-                'Andromeda',
-                'Large Magellanic Cloud (LMC)',
-                'Small Magellanic Cloud (SMC)'
-            ]
-        }
-    def post(self):
-        #teste = request.args.get('teste')
-        #teste = request.form.get('teste')
-
-        return {
-            'cadastrou': teste
-        }
-
 # Create routes
-api.add_resource(Teste, '/api/galaxies')
+# To Do = ver se consegue colocar tipo nos parametros de rota
+api.add_resource(MoviesController, '/api/movies/', '/api/movies/<movie_id>')
 
 # Run the application
 if __name__ == '__main__':

@@ -9,7 +9,7 @@
         <ul>
             <?php
             # $json = file_get_contents('http://observatory-service/');
-            $json = file_get_contents('http://backend-py/api/galaxies');
+            $json = file_get_contents('http://backend-py/api/movies');
             $obj = json_decode($json);
             $galaxies = $obj->Galaxies;
             foreach ($galaxies as $galaxy) {
