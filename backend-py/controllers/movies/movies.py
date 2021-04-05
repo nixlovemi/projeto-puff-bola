@@ -17,8 +17,11 @@ class MoviesController(Resource):
     #    teste = request.args.get('teste')
     #    return teste
 
-    def post(self):
-        return 123
+    def post(self, moviesObject=dict):
+        #from shared.api_return import api_return
+        #from models.movies.movies import createMovies
+        return moviesObject
+        #return api_return('Filmes adicionado corretamente!', False, ret)
         #teste = request.args.get('teste')
         #teste = request.form.get('teste')
 
