@@ -1,4 +1,5 @@
 from flask_restful import Resource
+from flask import request
 
 # /api/movies
 class MoviesController(Resource):
@@ -17,10 +18,22 @@ class MoviesController(Resource):
     #    teste = request.args.get('teste')
     #    return teste
 
-    def post(self, moviesObject=dict):
+    def post(self):
         #from shared.api_return import api_return
         #from models.movies.movies import createMovies
-        return moviesObject
+
+        title = request.form.get('title') # se n vier a variavel, vem como null
+        # pega todas as variaveis necessarias
+        # criar o objeto
+        # Movies = {}
+        # Movies['title'] = title
+        # Movies['duration'] = ....
+
+        # trata se tem tds as variaveis q precisa
+        # ret = createMovie(Movies)
+        # trata o retorno
+
+        return title
         #return api_return('Filmes adicionado corretamente!', False, ret)
         #teste = request.args.get('teste')
         #teste = request.form.get('teste')
