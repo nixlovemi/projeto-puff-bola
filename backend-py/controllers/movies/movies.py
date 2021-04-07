@@ -19,21 +19,30 @@ class MoviesController(Resource):
     #    return teste
 
     def post(self):
-        #from shared.api_return import api_return
-        #from models.movies.movies import createMovies
+      from models.movies.movies import insertMovies
+      from shared.api_return import api_return
 
-        title = request.form.get('title') # se n vier a variavel, vem como null
-        # pega todas as variaveis necessarias
-        # criar o objeto
-        # Movies = {}
-        # Movies['title'] = title
-        # Movies['duration'] = ....
+      title = request.form.get('title')
+      genre = request.form.get('genre')
+      isan = request.form.get('isan')
+      duration = request.form.get('duration')
+      releaseYear = request.form.get('releaseYear')
+      rating = request.form.get('rating')
 
-        # trata se tem tds as variaveis q precisa
-        # ret = createMovie(Movies)
-        # trata o retorno
+      movies = {}
+      movies['title'] = title
+      movies['genre'] = genre
+      movies['isan'] = isan
+      movies['duration'] = duration
+      movies['releaseYear'] = releaseYear
+      movies['rating'] = rating
+      ret = insertMovies(movies)
 
-        return title
+      # trata se tem tds as variaveis q precisa
+      # ret = createMovie(Movies)
+      # trata o retorno
+
+      return ret
         #return api_return('Filmes adicionado corretamente!', False, ret)
         #teste = request.args.get('teste')
         #teste = request.form.get('teste')
