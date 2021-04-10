@@ -3,7 +3,6 @@ from datetime import datetime
 
 presentYear = datetime.today().year
 
-
 def getMovies(movie_id=None):
 
     mydb = getConnection()
@@ -96,15 +95,29 @@ def insertMovies(movie):
     error = True
     msg = 'Erro! Favor escolher uma nota entre 0 e 10!'''
 
-
+  if not validarISAN(isan):
+      error = True
+      msg = 'Erro! ISAN inválido!'
 
 #Inserindo Filme na tabela
   if error == False:
     sqlInsert = (f"INSERT INTO movies (title, isan, duration, release_year) VALUES ( '{title}', '{isan}', {duration}, {releaseYear})")
     mycursor.execute(sqlInsert)
-    movieResult = mycursor.fetchall()
-  #sql = f'INSERT '
+    if mycursor.rowcount <= 0:
+        error = True
+        msg = 'Erro ao adicionar o filme'
+
   objReturn = {}
   objReturn['msg'] = msg
   objReturn['error'] = error
   return objReturn
+
+def validarISAN(isan):
+    import re
+    #x = re.search("/^[a-zA-z0-9]{4}\-[a-zA-z0-9]{4}\-[a-zA-z0-9]{4}\-[a-zA-z0-9]{4}/gm", isan)
+    x = re.search("^[a-zA-z0-9]{4}\-[a-zA-z0-9]{4}\-[a-zA-z0-9]{4}\-[a-zA-z0-9]{4}", isan)
+
+    if x:
+      return True
+    else:
+      return False

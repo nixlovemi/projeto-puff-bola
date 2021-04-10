@@ -9,3 +9,10 @@ https://web.isan.org/public/en/search?domain=search
   * Mostrar containers: docker ps
   * Remover containers: docker rm -f $(docker ps -a -q)
   * Abrir bash: docker exec -it [NOME CONTAINER] bash
+
+# Python + MySQL
+================
+https://pynative.com/python-mysql-transaction-management-using-commit-rollback/
+
+# Expressão regular
+https://regex101.com/

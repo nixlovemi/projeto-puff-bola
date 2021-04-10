@@ -7,4 +7,5 @@ def getConnection():
         password="password",
         database="db"
     )
+    mydb.autocommit = True
     return mydb
