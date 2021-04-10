@@ -1,4 +1,7 @@
 from shared.database import getConnection
+from datetime import datetime
+
+presentYear = datetime.today().year
 
 
 def getMovies(movie_id=None):
@@ -37,59 +40,71 @@ def insertMovies(movie):
   genre = movie['genre']
   isan = movie['isan']
   rating = movie['rating']
-  if rating.isnumeric():
-    rating = int(rating)
   releaseYear = movie['releaseYear']
   duration = movie['duration']
+
+#Tratamento das Variaveis
+  if title == None:
+    title = ''
+  if duration == None or not duration.isnumeric():
+    duration = -1
+  else:
+    duration = int(duration)
+  '''if rating == None or not rating.isnumeric():
+    rating = -1
+  else:
+    rating = int(rating)'''
   msg = 'Filme Cadastrado com sucesso!'
   error = False
+  '''if genre == None or not genre.isnumeric():
+    genre = -1
+  else:
+    genre = int(genre)'''
+  if releaseYear == None or not releaseYear.isnumeric():
+    releaseYear = -1
+  else:
+    releaseYear = int(releaseYear)
+  if isan == None:
+    isan = ''
+# Validação das Variaveis
+  if len(title) > 100 or title == '':
+    error = True
+    msg = 'Erro! Título Inválido, Insira Título com até 100 caracteres!'
+  '''if genre < 0 and genre > 12:
+    error = True
+    msg = 'Erro! Favor escolher um Gênero válido'''
 
-  if title is None or len(title) == 0:
-    error = True
-    msg = 'Erro! Favor digitar um Título válido'
-  elif len(title) > 100:
-    error = True
-    msg = 'Erro! Título Inválido, excede a quantidade de 100 caracteres!'
-  if genre is None or genre.isnumeric() or len(genre) > 30:
-    error = True
-    msg = 'Erro! Favor escolher um Gênero válido'
   mydb = getConnection()
   mycursor = mydb.cursor()
-  sql = f'SELECT id FROM genres WHERE name = "{genre}" AND active = 1'
+  '''sql = f'SELECT id FROM genres WHERE id = {genre} AND active = 1
   mycursor.execute(sql)
   myresult = mycursor.fetchall()
+
   if len(myresult) == 0:
     error = True
-    msg = 'Erro! Gênero inexistente'
-  if isan is None or len(isan) == 0:
+    msg = 'Erro! Gênero inexistente'''
+  if len(isan) > 100 or isan == '':
     error = True
-    msg = 'Erro! Favor inserir um Isan!'
-  elif len(isan) > 100:
+    msg = 'Erro! Isan inválido! Insira Isan com até 100 caracteres!'
+  if duration < 0 or duration > 999:
     error = True
-    msg = 'Erro! Isan excede 100 caracteres, favor inserir Isan válido!'
-  if duration is not None and not duration.isnumeric():
-    error = True
-    msg = 'Erro! Duração inválida!'
-  elif duration is not None and len(duration) > 5:
-    error = True
-    msg = 'Erro! Duração excede o tamanho máximo!'
-    return 'oi'
-  if releaseYear is not None and not releaseYear.isnumeric():
+    msg = 'Erro! Duração Inválida!'
+  if releaseYear < 1895 or releaseYear > presentYear:
     error = True
     msg = 'Erro! Ano de lançamento inválido!'
-    return 'oi'
-  elif releaseYear is not None and len(releaseYear) is not 4:
+  '''if rating > 10 or rating < 0:
     error = True
-    msg = 'Erro! Ano de lançamento precisa ter quatro dígitos!'
-    return 'oi'
-  if rating is None or rating == '' or rating.isalpha():
-    error = True
-    msg = 'Erro! Nota inválida!'
-  elif rating > 10 or rating < 0:
-    error = True
-    msg = 'Erro! Favor escolher uma nota entre 0 e 10!'
+    msg = 'Erro! Favor escolher uma nota entre 0 e 10!'''
+
+
+
+#Inserindo Filme na tabela
+  if error == False:
+    sqlInsert = (f"INSERT INTO movies (title, isan, duration, release_year) VALUES ( '{title}', '{isan}', {duration}, {releaseYear})")
+    mycursor.execute(sqlInsert)
+    movieResult = mycursor.fetchall()
+  #sql = f'INSERT '
   objReturn = {}
   objReturn['msg'] = msg
   objReturn['error'] = error
   return objReturn
-
