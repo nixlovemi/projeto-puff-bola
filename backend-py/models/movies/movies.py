@@ -49,16 +49,16 @@ def insertMovies(movie):
     duration = -1
   else:
     duration = int(duration)
-  '''if rating == None or not rating.isnumeric():
+  if rating == None or not rating.isnumeric():
     rating = -1
   else:
-    rating = int(rating)'''
+    rating = int(rating)
   msg = 'Filme Cadastrado com sucesso!'
   error = False
-  '''if genre == None or not genre.isnumeric():
+  if genre == None or not genre.isnumeric():
     genre = -1
   else:
-    genre = int(genre)'''
+    genre = int(genre)
   if releaseYear == None or not releaseYear.isnumeric():
     releaseYear = -1
   else:
@@ -69,19 +69,19 @@ def insertMovies(movie):
   if len(title) > 100 or title == '':
     error = True
     msg = 'Erro! Título Inválido, Insira Título com até 100 caracteres!'
-  '''if genre < 0 and genre > 12:
-    error = True
-    msg = 'Erro! Favor escolher um Gênero válido'''
+    if genre < 0 and genre > 12:
+      error = True
+      msg = 'Erro! Favor escolher um Gênero válido'
 
   mydb = getConnection()
   mycursor = mydb.cursor()
-  '''sql = f'SELECT id FROM genres WHERE id = {genre} AND active = 1
+  sql = f'SELECT id FROM genres WHERE id = {genre} AND active = 1'
   mycursor.execute(sql)
   myresult = mycursor.fetchall()
 
   if len(myresult) == 0:
     error = True
-    msg = 'Erro! Gênero inexistente'''
+    msg = 'Erro! Gênero inexistente'
   if len(isan) > 100 or isan == '':
     error = True
     msg = 'Erro! Isan inválido! Insira Isan com até 100 caracteres!'
@@ -91,9 +91,9 @@ def insertMovies(movie):
   if releaseYear < 1895 or releaseYear > presentYear:
     error = True
     msg = 'Erro! Ano de lançamento inválido!'
-  '''if rating > 10 or rating < 0:
+  if rating > 10 or rating < 0:
     error = True
-    msg = 'Erro! Favor escolher uma nota entre 0 e 10!'''
+    msg = 'Erro! Favor escolher uma nota entre 0 e 10!'
 
   if not validarISAN(isan):
       error = True
@@ -106,6 +106,10 @@ def insertMovies(movie):
     if mycursor.rowcount <= 0:
         error = True
         msg = 'Erro ao adicionar o filme'
+    else:
+      movieLastId = mycursor.lastrowid
+      sqlInsert = (f"INSERT INTO movies_genres (genre_id, movie_id) VALUES ({genre}, {movieLastId}) ")
+      mycursor.execute(sqlInsert)
 
   objReturn = {}
   objReturn['msg'] = msg
