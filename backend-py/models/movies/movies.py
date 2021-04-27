@@ -21,16 +21,16 @@ def getMovies(movie_id=None):
 
     arrMovies = []
     for x in myresult:
-        objMovies = {}
-        objMovies['id'] = x[0]
-        objMovies['title'] = x[1]
-        objMovies['isan'] = x[2]
-        objMovies['trailer_url'] = x[3]
-        objMovies['duration'] = x[4]
-        objMovies['release_year'] = x[5]
-        objMovies['active'] = x[6]
+        dictMovies = {}
+        dictMovies['id'] = x[0]
+        dictMovies['title'] = x[1]
+        dictMovies['isan'] = x[2]
+        dictMovies['trailer_url'] = x[3]
+        dictMovies['duration'] = x[4]
+        dictMovies['release_year'] = x[5]
+        dictMovies['active'] = x[6]
 
-        arrMovies.append(objMovies)
+        arrMovies.append(dictMovies)
 
     return arrMovies
 
@@ -125,3 +125,29 @@ def validarISAN(isan):
       return True
     else:
       return False
+
+def updateMovie(movie):
+  title = movie['title']
+  genre = movie['genre']
+  isan = movie['isan']
+  rating = movie['rating']
+  releaseYear = movie['releaseYear']
+  duration = movie['duration']
+
+
+def deleteMovie(id_movie):
+  error = False
+  msg = 'Filme deletado com sucesso!'
+  mydb = getConnection()
+  mycursor = mydb.cursor()
+  sqlValidation = f'SELECT id FROM movies WHERE id = {id_movie} AND active = 1'
+  mycursor.execute(sqlValidation)
+  myresult = mycursor.fetchall()
+  if len(myresult) > 0:
+    sqlUpdate = f'UPDATE movies SET active = 0 WHERE id = {id_movie}'
+    mycursor.execute(sqlUpdate)
+  else:
+    error = True
+    msg = 'Erro! Não foi possivel deletar o filme'
+
+  #Perguntar se tem como verificar um update no banco

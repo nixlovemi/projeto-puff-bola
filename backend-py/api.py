@@ -2,6 +2,7 @@
 from flask import Flask
 from flask_restful import Api
 from controllers.movies.movies import MoviesController
+from controllers.genres.genres import GenresController
 
 # Instantiate the app
 app = Flask(__name__)
@@ -18,6 +19,7 @@ api = Api(app)
 # Create routes
 # To Do = ver se consegue colocar tipo nos parametros de rota
 api.add_resource(MoviesController, '/api/movies/', '/api/movies/<movie_id>')
+api.add_resource(GenresController, '/api/genres/', '/api/genres/<genre_id>')
 
 # Run the application
 if __name__ == '__main__':

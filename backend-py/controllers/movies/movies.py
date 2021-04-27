@@ -12,7 +12,7 @@ class MoviesController(Resource):
         else:
             ret = getMovies()
 
-        return api_return('Filmes pesquisados corretamente!', False, ret)
+        return api_return('Filme(s) pesquisado(s) corretamente!', False, ret)
     #def patch(self):
     #    from flask import request
     #    teste = request.args.get('teste')
@@ -20,7 +20,6 @@ class MoviesController(Resource):
 
     def post(self):
       from models.movies.movies import insertMovies
-      from shared.api_return import api_return
 
       title = request.form.get('title')
       genre = request.form.get('genre')
@@ -43,6 +42,35 @@ class MoviesController(Resource):
       # trata o retorno
 
       return ret
+
+    def put(self):
+      from models.movies.movies import updateMovie
+
+      title = request.form.get('title')
+      genre = request.form.get('genre')
+      isan = request.form.get('isan')
+      duration = request.form.get('duration')
+      releaseYear = request.form.get('releaseYear')
+      rating = request.form.get('rating')
+
+      movies = {}
+      movies['title'] = title
+      movies['genre'] = genre
+      movies['isan'] = isan
+      movies['duration'] = duration
+      movies['releaseYear'] = releaseYear
+      movies['rating'] = rating
+      ret = updateMovie(movies)
+
+      return ret
+
+    def delete(self):
+      from models.movies.movies import deleteMovie
+      id_movie = request.form.get('id_movie')
+      ret = deleteMovie(id_movie)
+
+      return ret
+
         #return api_return('Filmes adicionado corretamente!', False, ret)
         #teste = request.args.get('teste')
         #teste = request.form.get('teste')
