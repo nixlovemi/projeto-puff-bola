@@ -1,5 +1,6 @@
 import mysql.connector as db
 
+
 def getConnection():
     mydb = db.connect(
         host="projeto-puff-bola_db_1",
