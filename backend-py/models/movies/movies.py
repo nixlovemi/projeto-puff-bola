@@ -263,16 +263,15 @@ def updateMovie(movie):
                 f"UPDATE movies SET title = '{title}', isan = '{isan}', trailer_url = {trailerUrl}, duration = {duration}, release_year = {releaseYear} WHERE id = {movie_id} AND active = 1;")
             try:
                 mycursor.execute(sqlEdit)
-            except mysql.connector.Error as err:
+            except Exception as e:
                 error = True
-                msg = f'Erro: {err.msg} na linha: {sys.exc_info()[-1].tb_lineno}'
+                msg = f'Erro: {e!r} na linha: {sys.exc_info()[-1].tb_lineno}'
 
-            if mycursor.rowcount == -1:
-                error = True
-                msg = 'Erro ao alterar o Filme'
+            if mycursor.rowcount <=0 and error is False:
+                msg = 'Nada foi alterado!'
             else:
                 # edita o vinculo do filme com o genero na tabela movies_genres
-                sqlEditGenre = (f"UPDATE movies_genres SET genre_id = {genre_id} WHERE movie_id = {movie_id}")
+                sqlEditGenre = f"UPDATE movies_genres SET genre_id = {genre_id} WHERE movie_id = {movie_id}"
                 try:
                     mycursor.execute(sqlEditGenre)
                 except mysql.connector.Error as err:

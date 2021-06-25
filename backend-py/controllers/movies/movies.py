@@ -65,8 +65,8 @@ class MoviesController(Resource):
         movies['releaseYear'] = releaseYear
         movies['rating'] = rating
         ret = updateMovie(movies)
-        
-        return api_return(ret['msg'], ret['error'])
+        return ret
+        #return api_return(ret['msg'], ret['error'])
 
     def delete(self, movie_id):
         from shared.api_return import api_return
