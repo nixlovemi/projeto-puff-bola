@@ -8,10 +8,7 @@ class MoviesController(Resource):
         from shared.api_return import api_return
         from models.movies.movies import getMovies
 
-        if movie_id is not None:
-            ret = getMovies(movie_id)
-        else:
-            ret = getMovies()
+        ret = getMovies(movie_id)
 
         return api_return('Filme(s) pesquisado(s) corretamente!', False, ret)
 
@@ -19,8 +16,10 @@ class MoviesController(Resource):
         # inserir filmes
         from shared.api_return import api_return
         from models.movies.movies import insertMovies
+        import json
 
         title = request.form.get('title')
+        # o genre_id é uma string json nesse formato -> {"indice":id_genre, ...} -> {"0": 10, "1", 20}
         genre_id = request.form.get('genre_id')
         isan = request.form.get('isan')
         trailerUrl = request.form.get('trailerUrl')
@@ -38,8 +37,8 @@ class MoviesController(Resource):
         movies['rating'] = rating
         ret = insertMovies(movies)
 
-        #return api_return(ret['msg'], ret['error'])
-        return ret
+        return api_return(ret['msg'], ret['error'])
+        #return ret
 
     def put(self):
         # editar filmes

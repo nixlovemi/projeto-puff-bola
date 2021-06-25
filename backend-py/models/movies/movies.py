@@ -38,8 +38,15 @@ def getMovies(movie_id=None):
 
 
 def insertMovies(movie):
+    import json
+
     title = movie['title'].strip()
     genre_id = movie['genre_id']
+    try:
+        data = json.loads(genre_id)
+    except:
+        data = None
+
     isan = movie['isan'].strip()
     trailerUrl = movie['trailerUrl'].strip()
     rating = movie['rating']
@@ -63,10 +70,6 @@ def insertMovies(movie):
         rating = -1
     else:
         rating = int(rating)
-    if genre_id is None or not genre_id.isnumeric():
-        genre_id = -1
-    else:
-        genre_id = int(genre_id)
     if releaseYear is None or not releaseYear.isnumeric():
         releaseYear = -1
     else:
@@ -82,16 +85,25 @@ def insertMovies(movie):
         error = True
         msg = 'Erro! Título Inválido, Insira Título com até 100 caracteres!'
 
-    if genre_id <= 0:
+    if data is None:
         error = True
         msg = 'Erro! Favor escolher um Gênero válido'
     else:
-        sql = f'SELECT id FROM genres WHERE id = {genre_id} AND active = 1'
+        valores = ""
+
+        for x in data:
+            valores += f'{str(data[x])}, '
+
+        valores += "-1"
+
+        sql = f'SELECT COUNT(*) FROM genres WHERE id IN ({valores}) AND active = 1'
         mycursor.execute(sql)
-        myresult = mycursor.fetchall()
-        if len(myresult) == 0:
+        myresult = mycursor.fetchone()
+        count = myresult[0]
+
+        if len(data) != count:
             error = True
-            msg = 'Erro! Gênero inexistente'
+            msg = 'Erro! Um ou mais  generos inexistentes!'
 
     if duration < 0 or duration > 999:
         error = True
@@ -125,9 +137,12 @@ def insertMovies(movie):
             else:
                 # faz o vinculo do filme com o genero na tabela movies_genres
                 movieLastId = mycursor.lastrowid
-                sqlInsertGenre = (f"INSERT INTO movies_genres (genre_id, movie_id) VALUES ({genre_id}, {movieLastId}) ")
+
                 try:
-                    mycursor.execute(sqlInsertGenre)
+                    for x in data:
+                        sqlInsertGenre = f"INSERT INTO movies_genres (genre_id, movie_id) VALUES ({data[x]}, {movieLastId})"
+                        mycursor.execute(sqlInsertGenre)
+
                 except mysql.connector.Error as err:
                     error = True
                     msg = f'Erro: {err.msg} na linha: {sys.exc_info()[-1].tb_lineno}'
