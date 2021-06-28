@@ -16,7 +16,6 @@ class MoviesController(Resource):
         # inserir filmes
         from shared.api_return import api_return
         from models.movies.movies import insertMovies
-        import json
 
         title = request.form.get('title')
         # o genre_id é uma string json nesse formato -> {"indice":id_genre, ...} -> {"0": 10, "1", 20}
@@ -38,21 +37,18 @@ class MoviesController(Resource):
         ret = insertMovies(movies)
 
         return api_return(ret['msg'], ret['error'])
-        #return ret
 
-    def put(self):
+    def put(self, movie_id):
         # editar filmes
         from shared.api_return import api_return
         from models.movies.movies import updateMovie
 
-        movie_id = request.form.get('movie_id')
         title = request.form.get('title')
         genre_id = request.form.get('genre_id')
         isan = request.form.get('isan')
         trailerUrl = request.form.get('trailerUrl')
         duration = request.form.get('duration')
         releaseYear = request.form.get('releaseYear')
-        rating = request.form.get('rating')
 
         movies = {}
         movies['movie_id'] = movie_id
@@ -62,7 +58,6 @@ class MoviesController(Resource):
         movies['trailerUrl'] = trailerUrl
         movies['duration'] = duration
         movies['releaseYear'] = releaseYear
-        movies['rating'] = rating
         ret = updateMovie(movies)
         return ret
         #return api_return(ret['msg'], ret['error'])

@@ -42,11 +42,6 @@ def insertMovies(movie):
 
     title = movie['title'].strip()
     genre_id = movie['genre_id']
-    try:
-        data = json.loads(genre_id)
-    except:
-        data = None
-
     isan = movie['isan'].strip()
     trailerUrl = movie['trailerUrl'].strip()
     rating = movie['rating']
@@ -54,10 +49,15 @@ def insertMovies(movie):
     duration = movie['duration']
     msg = 'Filme Cadastrado com sucesso!'
     error = False
+    objReturn = {}
 
     # Tratamento das Variaveis
     if title is None:
         title = ''
+    try:
+        arrGenre = json.loads(genre_id)
+    except:
+        arrGenre = None
     if duration is None or not duration.isnumeric():
         duration = -1
     else:
@@ -85,14 +85,22 @@ def insertMovies(movie):
         error = True
         msg = 'Erro! Título Inválido, Insira Título com até 100 caracteres!'
 
-    if data is None:
+        objReturn['msg'] = msg
+        objReturn['error'] = error
+        return objReturn
+
+    if arrGenre is None:
         error = True
         msg = 'Erro! Favor escolher um Gênero válido'
+
+        objReturn['msg'] = msg
+        objReturn['error'] = error
+        return objReturn
     else:
         valores = ""
 
-        for x in data:
-            valores += f'{str(data[x])}, '
+        for x in arrGenre:
+            valores += f'{str(arrGenre[x])}, '
 
         valores += "-1"
 
@@ -101,55 +109,91 @@ def insertMovies(movie):
         myresult = mycursor.fetchone()
         count = myresult[0]
 
-        if len(data) != count:
+        if len(arrGenre) != count:
             error = True
             msg = 'Erro! Um ou mais  generos inexistentes!'
+
+            objReturn['msg'] = msg
+            objReturn['error'] = error
+            return objReturn
 
     if duration < 0 or duration > 999:
         error = True
         msg = 'Erro! Duração Inválida!'
+
+        objReturn['msg'] = msg
+        objReturn['error'] = error
+        return objReturn
     if releaseYear < 1895 or releaseYear > presentYear:
         error = True
         msg = 'Erro! Ano de lançamento inválido!'
+
+        objReturn['msg'] = msg
+        objReturn['error'] = error
+        return objReturn
     if rating > 10 or rating < 0:
         error = True
         msg = 'Erro! Favor escolher uma nota entre 0 e 10!'
 
+        objReturn['msg'] = msg
+        objReturn['error'] = error
+        return objReturn
+
     # valida se o ISAN ja foi usado e se é valido
-    objReturn = validarISAN(isan)
-    if objReturn['error']:
+    retIsan = validarISAN(isan)
+    if retIsan['error']:
         error = True
-        msg = objReturn['msg']
+        msg = retIsan['msg']
+
+        objReturn['msg'] = msg
+        objReturn['error'] = error
+        return objReturn
     else:
         # Inserindo Filme na tabela
         if not error:
-            sqlInsert = (
-                f"INSERT INTO movies (title, isan, trailer_url, duration, release_year) VALUES ( '{title}', '{isan}', {trailerUrl}, {duration}, {releaseYear})")
+            sqlInsert = (f"INSERT INTO movies (title, isan, trailer_url, duration, release_year) "
+                         f"VALUES ( '{title}', '{isan}', {trailerUrl}, {duration}, {releaseYear})")
             try:
                 mycursor.execute(sqlInsert)
             except mysql.connector.Error as err:
                 error = True
                 msg = f'Erro: {err.msg} na linha: {sys.exc_info()[-1].tb_lineno}'
 
+                objReturn['msg'] = msg
+                objReturn['error'] = error
+                return objReturn
+
             if mycursor.rowcount <= 0:
                 error = True
                 msg = 'Erro ao adicionar o Filme'
+
+                objReturn['msg'] = msg
+                objReturn['error'] = error
+                return objReturn
             else:
                 # faz o vinculo do filme com o genero na tabela movies_genres
                 movieLastId = mycursor.lastrowid
 
                 try:
-                    for x in data:
-                        sqlInsertGenre = f"INSERT INTO movies_genres (genre_id, movie_id) VALUES ({data[x]}, {movieLastId})"
+                    for x in arrGenre:
+                        sqlInsertGenre = f"INSERT INTO movies_genres (genre_id, movie_id) VALUES ({arrGenre[x]}, {movieLastId})"
                         mycursor.execute(sqlInsertGenre)
 
                 except mysql.connector.Error as err:
                     error = True
                     msg = f'Erro: {err.msg} na linha: {sys.exc_info()[-1].tb_lineno}'
 
+                    objReturn['msg'] = msg
+                    objReturn['error'] = error
+                    return objReturn
+
                 if mycursor.rowcount <= 0:
                     error = True
                     msg = 'Erro ao vincular o Genero!'
+
+                    objReturn['msg'] = msg
+                    objReturn['error'] = error
+                    return objReturn
 
                 # faz o vinculo do filme com a nota na tabela movies_rating
                 sqlInsertRating = f'INSERT INTO movies_rating (movie_id, rating) VALUES ({movieLastId}, {rating})'
@@ -159,17 +203,24 @@ def insertMovies(movie):
                     error = True
                     msg = f'Erro: {err.msg} na linha: {sys.exc_info()[-1].tb_lineno}'
 
+                    objReturn['msg'] = msg
+                    objReturn['error'] = error
+                    return objReturn
+
                 if mycursor.rowcount <= 0:
                     error = True
                     msg = 'Erro ao vincular a Nota!'
 
-    objReturn = {}
+                    objReturn['msg'] = msg
+                    objReturn['error'] = error
+                    return objReturn
+
     objReturn['msg'] = msg
     objReturn['error'] = error
     return objReturn
 
 
-def validarISAN(isan, edit=False):
+def validarISAN(isan, movie_id=None):
     import re
 
     x = re.search("^[a-zA-z0-9]{4}\-[a-zA-z0-9]{4}\-[a-zA-z0-9]{4}\-[a-zA-z0-9]{4}", isan)
@@ -181,15 +232,14 @@ def validarISAN(isan, edit=False):
         error = True
         msg = 'Erro! ISAN inválido!'
 
-    if not edit:
-        mydb = getConnection()
-        mycursor = mydb.cursor()
+    mydb = getConnection()
+    mycursor = mydb.cursor()
 
-        sql = f' SELECT id FROM movies WHERE isan = "{isan}" '
-        mycursor.execute(sql)
-        myresult = mycursor.fetchall()
+    sql = f' SELECT id FROM movies WHERE isan = "{isan}" '
+    mycursor.execute(sql)
+    myresult = mycursor.fetchone()
 
-        if len(myresult) > 0:
+    if myresult is not None and int(movie_id) != myresult[0]:
             error = True
             msg = 'Erro! ISAN já cadastrado em outro filme!'
 
@@ -200,6 +250,8 @@ def validarISAN(isan, edit=False):
 
 
 def updateMovie(movie):
+    import json
+
     movie_id = movie['movie_id']
     title = movie['title'].strip()
     genre_id = movie['genre_id']
@@ -207,17 +259,17 @@ def updateMovie(movie):
     trailerUrl = movie['trailerUrl'].strip()
     duration = movie['duration']
     releaseYear = movie['releaseYear']
-    rating = movie['rating']
     error = False
     msg = 'Filme alterado com sucesso!'
+    objReturn = {}
 
     # tratamento das variaveis
     if title is None:
         title = ''
-    if genre_id is None or not genre_id.isnumeric():
-        genre_id = -1
-    else:
-        genre_id = int(genre_id)
+    try:
+        arrGenre = json.loads(genre_id)
+    except:
+        arrGenre = None
     if isan is None:
         isan = ''
     if trailerUrl == '':
@@ -232,10 +284,6 @@ def updateMovie(movie):
         releaseYear = -1
     else:
         releaseYear = int(releaseYear)
-    if rating is None or not rating.isnumeric():
-        rating = -1
-    else:
-        rating = int(rating)
 
     # Validação das Variaveis
     mydb = getConnection()
@@ -245,71 +293,91 @@ def updateMovie(movie):
         error = True
         msg = 'Erro! Título Inválido, Insira Título com até 100 caracteres!'
 
-    if genre_id <= 0:
+        objReturn['msg'] = msg
+        objReturn['error'] = error
+        return objReturn
+
+    if arrGenre is None:
         error = True
         msg = 'Erro! Favor escolher um Gênero válido'
+
+        objReturn['msg'] = msg
+        objReturn['error'] = error
+        return objReturn
     else:
-        sql = f'SELECT id FROM genres WHERE id = {genre_id} AND active = 1'
+        valores = ""
+
+        for x in arrGenre:
+            valores += f'{str(arrGenre[x])}, '
+
+        valores += "-1"
+
+        sql = f'SELECT COUNT(*) FROM genres WHERE id IN ({valores}) AND active = 1'
         mycursor.execute(sql)
-        myresult = mycursor.fetchall()
-        if len(myresult) == 0:
+        myresult = mycursor.fetchone()
+        count = myresult[0]
+
+        if len(arrGenre) != count:
             error = True
-            msg = 'Erro! Gênero inexistente'
+            msg = 'Erro! Um ou mais  generos inexistentes!'
+
+            objReturn['msg'] = msg
+            objReturn['error'] = error
+            return objReturn
 
     if duration < 0 or duration > 999:
         error = True
         msg = 'Erro! Duração Inválida!'
+
+        objReturn['msg'] = msg
+        objReturn['error'] = error
+        return objReturn
     if releaseYear < 1895 or releaseYear > presentYear:
         error = True
         msg = 'Erro! Ano de lançamento inválido!'
-    if rating > 10 or rating < 0:
-        error = True
-        msg = 'Erro! Favor escolher uma nota entre 0 e 10!'
+
+        objReturn['msg'] = msg
+        objReturn['error'] = error
+        return objReturn
 
     # valida se o ISAN ja foi usado e se é valido
-    objReturn = validarISAN(isan, True)
-    if objReturn['error']:
+    retIsan = validarISAN(isan, movie_id)
+
+    if retIsan['error']:
         error = True
-        msg = objReturn['msg']
+        msg = retIsan['msg']
+
+        objReturn['msg'] = msg
+        objReturn['error'] = error
+        return objReturn
     else:
         # editar Filme na tabela
         if not error:
-            sqlEdit = (
-                f"UPDATE movies SET title = '{title}', isan = '{isan}', trailer_url = {trailerUrl}, duration = {duration}, release_year = {releaseYear} WHERE id = {movie_id} AND active = 1;")
+            sqlEdit = (f"UPDATE movies SET title = '{title}', isan = '{isan}', trailer_url = {trailerUrl}, duration = {duration}, "
+                       f"release_year = {releaseYear} WHERE id = {movie_id} AND active = 1;")
             try:
                 mycursor.execute(sqlEdit)
             except Exception as e:
                 error = True
                 msg = f'Erro: {e!r} na linha: {sys.exc_info()[-1].tb_lineno}'
 
-            if mycursor.rowcount <=0 and error is False:
-                msg = 'Nada foi alterado!'
-            else:
-                # edita o vinculo do filme com o genero na tabela movies_genres
-                sqlEditGenre = f"UPDATE movies_genres SET genre_id = {genre_id} WHERE movie_id = {movie_id}"
-                try:
+                objReturn['msg'] = msg
+                objReturn['error'] = error
+                return objReturn
+
+            # edita o vinculo do filme com o genero na tabela movies_genres
+            try:
+                sqlEditGenre = f"DELETE FROM movies_genres WHERE movie_id = {movie_id};"
+                mycursor.execute(sqlEditGenre)
+
+                for x in arrGenre:
+                    sqlEditGenre = f"INSERT INTO movies_genres (movie_id, genre_id) VALUES ({movie_id}, {arrGenre[x]});"
                     mycursor.execute(sqlEditGenre)
-                except mysql.connector.Error as err:
-                    error = True
-                    msg = f'Erro: {err.msg} na linha: {sys.exc_info()[-1].tb_lineno}'
 
-                if mycursor.rowcount == -1:
-                    error = True
-                    msg = 'Erro ao vincular o Genero!'
+            except mysql.connector.Error as err:
+                error = True
+                msg = f'Erro: {err.msg} na linha: {sys.exc_info()[-1].tb_lineno}'
 
-                # edita o vinculo do filme com a nota na tabela movies_rating
-                sqlEditRating = f'UPDATE movies_rating SET rating = {rating} WHERE movie_id = {movie_id}'
-                try:
-                    mycursor.execute(sqlEditRating)
-                except mysql.connector.Error as err:
-                    error = True
-                    msg = f'Erro: {err.msg} na linha: {sys.exc_info()[-1].tb_lineno}'
-
-                if mycursor.rowcount == -1:
-                    error = True
-                    msg = 'Erro ao vincular a Nota!'
-
-    objReturn = {}
     objReturn['msg'] = msg
     objReturn['error'] = error
     return objReturn
