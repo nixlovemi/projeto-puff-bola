@@ -41,7 +41,7 @@ class MoviesController(Resource):
     def put(self, movie_id):
         # editar filmes
         from shared.api_return import api_return
-        from models.movies.movies import updateMovie
+        from models.movies.movies import updateMovies
 
         title = request.form.get('title')
         genre_id = request.form.get('genre_id')
@@ -58,14 +58,14 @@ class MoviesController(Resource):
         movies['trailerUrl'] = trailerUrl
         movies['duration'] = duration
         movies['releaseYear'] = releaseYear
-        ret = updateMovie(movies)
-        return ret
-        #return api_return(ret['msg'], ret['error'])
+        ret = updateMovies(movies)
+
+        return api_return(ret['msg'], ret['error'])
 
     def delete(self, movie_id):
         from shared.api_return import api_return
-        from models.movies.movies import deleteMovie
+        from models.movies.movies import deleteMovies
 
-        ret = deleteMovie(movie_id)
+        ret = deleteMovies(movie_id)
 
         return api_return(ret['msg'], ret['error'])

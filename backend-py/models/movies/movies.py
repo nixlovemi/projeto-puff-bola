@@ -249,7 +249,7 @@ def validarISAN(isan, movie_id=None):
     return objReturn
 
 
-def updateMovie(movie):
+def updateMovies(movie):
     import json
 
     movie_id = movie['movie_id']
@@ -383,7 +383,7 @@ def updateMovie(movie):
     return objReturn
 
 
-def deleteMovie(movie_id):
+def deleteMovies(movie_id):
     error = False
     msg = 'Filme deletado com sucesso!'
 
@@ -394,11 +394,14 @@ def deleteMovie(movie_id):
         # "deleta" o filme mudando de ativo para inativo no banco
         mydb = getConnection()
         mycursor = mydb.cursor()
-        sqlUpdate = f'UPDATE movies SET active = 0 WHERE id = {movie_id}'
-        mycursor.execute(sqlUpdate)
-        if mycursor.rowcount <= 0:
+
+        try:
+            sqlDelete = f'UPDATE movies SET active = 0 WHERE id = {movie_id}'
+            mycursor.execute(sqlDelete)
+
+        except mysql.connector.Error as err:
             error = True
-            msg = 'Erro! Não foi possivel deletar o filme'
+            msg = f'Erro: {err.msg} na linha: {sys.exc_info()[-1].tb_lineno}'
     else:
         error = True
         msg = 'Erro! Filme inválido! Tente novamente!'
